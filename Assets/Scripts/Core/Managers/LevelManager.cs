@@ -45,6 +45,12 @@ namespace Core.Managers
             _isLevelActive = true;
         }
 
+        public void ResetProgress()
+        {
+            _isLevelActive = false;
+            SetLevel(0);
+        }
+
         public void RestartCurrentLevel() => SetLevel(_currentLevelIndex);
 
         public void NextLevel() => SetLevel(_currentLevelIndex + 1);

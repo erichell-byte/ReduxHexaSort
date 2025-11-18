@@ -26,17 +26,7 @@ namespace Core.GameStates
 
         protected override string SceneName => "Game";
 
-        public override async UniTask EnterAsync(CancellationToken token)
-        {
-            if (!IsSceneLoaded())
-            {
-                await base.EnterAsync(token);
-            }
-            else
-            {
-                await OnSceneLoaded(token);
-            }
-        }
+        public override UniTask EnterAsync(CancellationToken token) => base.EnterAsync(token);
 
         public override UniTask ExitAsync(CancellationToken token)
         {
@@ -96,12 +86,6 @@ namespace Core.GameStates
             _gameOverPresenter.NextLevelRequested -= OnNextLevelRequested;
             _gameOverPresenter.MainMenuRequested -= OnMainMenuRequested;
             _gameOverPresenter = null;
-        }
-
-        private bool IsSceneLoaded()
-        {
-            var scene = SceneManager.GetSceneByName(SceneName);
-            return scene.IsValid() && scene.isLoaded;
         }
 
         private DiContainer TryGetSceneContainer()
