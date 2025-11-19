@@ -40,6 +40,7 @@ namespace Gameplay.Board
         private IHexGrid _grid;
         private List<PlayerTower> _playerTowerViews = new();
         private Dictionary<Vector2Int, BoardTower> _boardTowers = new();
+        private bool _isShuttingDown;
         public bool CanUndo => _undoHistory.CanUndo;
 
         [Inject]
@@ -69,6 +70,11 @@ namespace Gameplay.Board
             _chainReaction.OnScoreAdded += OnScoreAdded;
         }
 
+        private void OnEnable()
+        {
+            _isShuttingDown = false;
+        }
+
         private async void Start()
         {
             await InitializeBoardAsync();
@@ -76,6 +82,8 @@ namespace Gameplay.Board
         }
         private void OnDestroy()
         {
+            _isShuttingDown = true;
+
             if (_chainReaction != null)
                 _chainReaction.OnScoreAdded -= OnScoreAdded;
         }
@@ -94,6 +102,8 @@ namespace Gameplay.Board
 
         private async UniTask InitializeBoardAsync()
         {
+            if (_isShuttingDown) return;
+
             _grid = _boardGenerator.GenerateBoard(_levelConfig);
             _undoHistory.Clear();
             _boosterPresenter?.SetUndoAvailability(false);
@@ -101,6 +111,8 @@ namespace Gameplay.Board
     
             foreach (var pos in _grid.Cells.Keys)
             {
+                if (_isShuttingDown) return;
+
                 CreateCellBackground(pos);
     
                 var boardTower = Instantiate(_boardTowerPrefab, _boardParent);
@@ -133,14 +145,19 @@ namespace Gameplay.Board
         
         private async UniTask AnimateNewTowersAppearanceAsync()
         {
+            if (_isShuttingDown) return;
             await UniTask.NextFrame();
+            if (_isShuttingDown) return;
         
             foreach (var tower in _playerTowerViews)
             {
+                if (tower == null) continue;
+
                 tower.transform.localScale = Vector3.zero;
                 tower.transform.DOScale(Vector3.one, 0.3f)
                     .SetEase(Ease.OutBack);
                 
+                if (_isShuttingDown) return;
                 await UniTask.Delay(100);
             }
         }
@@ -200,6 +217,8 @@ namespace Gameplay.Board
             if (_playerTowerViews.Count == 0)
             {
                 await UniTask.Delay(500);
+                if (_isShuttingDown) return;
+
                 if (_playerTowerViews.Count == 0)
                 {
                     await GeneratePlayerTowersAsync();
@@ -209,6 +228,8 @@ namespace Gameplay.Board
         
         private async UniTask GeneratePlayerTowersAsync()
         {
+            if (_isShuttingDown) return;
+
             _playerTowerViews.Clear();
     
             foreach (Transform child in _playerTowersParent)

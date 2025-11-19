@@ -31,6 +31,11 @@ namespace Gameplay.Towers
 
         public virtual void RefreshVisual()
         {
+            if (this == null || _cellModel == null)
+            {
+                return;
+            }
+
             CreateTowerVisual(_cellModel.Stack.Colors);
         }
 

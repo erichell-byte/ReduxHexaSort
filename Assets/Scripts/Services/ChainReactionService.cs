@@ -40,6 +40,11 @@ namespace Services
 
         public async Task CheckChains(Vector2Int placedPosition)
         {
+            if (_grid == null || _boardTowers == null)
+            {
+                return;
+            }
+
             var positionsToProcess = new Queue<Vector2Int>();
             int iterations = 0;
             const int maxIterations = 100;
@@ -52,7 +57,7 @@ namespace Services
                 
                 var currentPosition = positionsToProcess.Dequeue();
                 
-                if (!_boardTowers.TryGetValue(currentPosition, out var tower))
+                if (!_boardTowers.TryGetValue(currentPosition, out var tower) || tower == null)
                     continue;
 
                 await CheckTowerChains(currentPosition, tower, positionsToProcess);
@@ -62,7 +67,7 @@ namespace Services
 
         private async Task CheckTowerChains(Vector2Int position, BoardTower tower, Queue<Vector2Int> positionsToProcess)
         {
-            if (tower.IsEmpty) return;
+            if (tower == null || tower.IsEmpty) return;
 
             var neighbors = GetNeighborTowers(position);
             var currentTopColor = tower.GetTopColor();
@@ -71,7 +76,7 @@ namespace Services
 
             foreach (var neighbor in neighbors)
             {
-                if (neighbor.tower.IsEmpty) continue;
+                if (neighbor.tower == null || neighbor.tower.IsEmpty) continue;
 
                 var neighborTopColor = neighbor.tower.GetTopColor();
                 if (!neighborTopColor.HasValue) continue;
@@ -92,8 +97,11 @@ namespace Services
                         await TransferTopPiece(neighbor.tower, tower);
                     }
 
-                    positionsToProcess.Enqueue(position);
-                    positionsToProcess.Enqueue(neighbor.position);
+                    if (_boardTowers != null)
+                    {
+                        positionsToProcess.Enqueue(position);
+                        positionsToProcess.Enqueue(neighbor.position);
+                    }
                     return;
                 }
             }
@@ -105,7 +113,9 @@ namespace Services
 
             foreach (var position in positionsToCheck)
             {
-                var tower = _boardTowers[position];
+                if (!_boardTowers.TryGetValue(position, out var tower) || tower == null)
+                    continue;
+
                 if (tower.IsEmpty) continue;
 
                 var cell = _grid.GetCell(position);
@@ -120,6 +130,11 @@ namespace Services
 
         private async Task TransferTopPiece(BoardTower fromTower, BoardTower toTower)
         {
+            if (fromTower == null || toTower == null)
+            {
+                return;
+            }
+
             var fromPosition = _towerPlacement.FindCellPositionByTower(fromTower);
             var toPosition = _towerPlacement.FindCellPositionByTower(toTower);
 
@@ -151,14 +166,20 @@ namespace Services
             }
 
             toCell.AddColor(topColor);
-            fromTower.RefreshVisual();
-            toTower.RefreshVisual();
+
+            fromTower?.RefreshVisual();
+            toTower?.RefreshVisual();
 
             await Task.Delay(100);
         }
 
         private async Task RemoveTopSequence(IHexCell cell, BoardTower tower, int count)
         {
+            if (tower == null)
+            {
+                return;
+            }
+
             var piecesToRemove = new List<Transform>();
         
             for (int i = 0; i < count && !cell.IsEmpty; i++)
@@ -187,7 +208,7 @@ namespace Services
 
         private int CountTopColorSequence(BoardTower tower)
         {
-            if (tower.IsEmpty) return 0;
+            if (tower == null || tower.IsEmpty || _grid == null) return 0;
 
             var position = _towerPlacement.FindCellPositionByTower(tower);
             if (!position.HasValue) return 0;
@@ -216,6 +237,10 @@ namespace Services
         private List<(Vector2Int position, BoardTower tower)> GetNeighborTowers(Vector2Int position)
         {
             var neighbors = new List<(Vector2Int, BoardTower)>();
+            if (_boardTowers == null)
+            {
+                return neighbors;
+            }
             Vector2Int[] directions = {
                 new(1, 0), new(1, -1), new(0, -1),
                 new(-1, 0), new(-1, 1), new(0, 1)
@@ -234,6 +259,10 @@ namespace Services
         private HashSet<Vector2Int> GetTowersInRadius(Vector2Int center, int radius)
         {
             var positions = new HashSet<Vector2Int>();
+            if (_boardTowers == null)
+            {
+                return positions;
+            }
 
             for (int q = -radius; q <= radius; q++)
             {
