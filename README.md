@@ -4,11 +4,11 @@
 Время на задачу: ≈ 6 часов (добавление слоёв архитектуры, DI, бустеров, сохранений)
 
 Архитектура
-Hexa.Core – стейт-машина, загрузка сцен, Zenject-установщики.
-Hexa.Domain – чистая логика: гекса-решётка, стопки, правила победы/проигрыша, команды бустеров, undo-состояния.
-Hexa.Infrastructure – сервисы анимации, ввода, сохранения (PlayerPrefs), общий инпут.
-Hexa.Gameplay.Services – размещение башен, цепные реакции, генератор поля, колода игрока, drag-сервис.
-Hexa.Presentation – презентеры (HUD/Menu/GameOver/Booster) + UI-модели/вью, BoardController, PlayerTower, MenuView и т.п.
+-Hexa.Core – стейт-машина, загрузка сцен, Zenject-установщики.
+-Hexa.Domain – чистая логика: гекса-решётка, стопки, правила победы/проигрыша, команды бустеров, undo-состояния.
+-Hexa.Infrastructure – сервисы анимации, ввода, сохранения (PlayerPrefs), общий инпут.
+-Hexa.Gameplay.Services – размещение башен, цепные реакции, генератор поля, колода игрока, drag-сервис.
+-Hexa.Presentation – презентеры (HUD/Menu/GameOver/Booster) + UI-модели/вью, BoardController, PlayerTower, MenuView и т.п.
 
 Zenject: Dependency Injection в сценах, фабрики для префабов, унитестов нет, асинхронщина через UniTask, анимации через DOTween.
 
